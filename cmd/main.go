@@ -2,6 +2,7 @@ package main
 
 import (
 	"balance_tool/balance"
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -36,9 +37,17 @@ func main() {
 	}
 	log.Println("we have a connection")
 
-	balance, ethBalance, exchangeRate, usdBalance := balance.EthBalance(address, client)
-	fmt.Println("WEI balance:", balance)
+	bytecode, err := client.CodeAt(context.Background(), address, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if len(bytecode) > 0 {
+		log.Fatal("the received address is the address of the smart contract")
+	}
+
+	_, ethBalance, _, wethBalance, exchangeRate, usdBalance := balance.EthWethBalance(address, client)
 	fmt.Println("ETH balance:", ethBalance)
+	fmt.Println("WETH balance:", wethBalance)
 	fmt.Println("ETH / USD:", exchangeRate)
-	fmt.Printf("USD balance: %.2f\n", usdBalance)
+	fmt.Printf("total USD balance: %.2f\n", usdBalance)
 }
